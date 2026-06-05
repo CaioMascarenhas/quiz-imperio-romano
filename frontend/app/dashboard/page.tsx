@@ -5,7 +5,6 @@ import type React from "react"
 import { useRouter } from "next/navigation"
 import { Bot, Crown, History, Landmark, LogOut, Medal, MessageCircle, ScrollText, Trophy } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
   QuizQuestion,
@@ -63,7 +62,7 @@ export default function DashboardPage() {
             <button
               key={id}
               onClick={() => setActive(id)}
-              className={`flex h-11 items-center gap-3 px-3 text-left text-sm transition ${
+              className={`flex h-11 cursor-pointer items-center gap-3 px-3 text-left text-sm transition ${
                 active === id ? "bg-sidebar-primary text-sidebar-primary-foreground" : "hover:bg-sidebar-accent"
               }`}
             >
@@ -72,7 +71,7 @@ export default function DashboardPage() {
             </button>
           ))}
         </nav>
-        <Button onClick={logout} variant="ghost" className="absolute bottom-5 left-5 right-5 justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+        <Button onClick={logout} variant="ghost" className="absolute bottom-5 left-5 right-5 cursor-pointer justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
           <LogOut className="size-4" /> Sair
         </Button>
       </aside>
@@ -81,11 +80,11 @@ export default function DashboardPage() {
         <header className="sticky top-0 z-10 border-b bg-background/90 px-4 py-3 backdrop-blur md:hidden">
           <div className="flex items-center justify-between">
             <strong>Roma Ludus</strong>
-            <Button onClick={logout} variant="ghost" size="icon"><LogOut className="size-4" /></Button>
+            <Button onClick={logout} variant="ghost" size="icon" className="cursor-pointer"><LogOut className="size-4" /></Button>
           </div>
           <div className="mt-3 grid grid-cols-4 gap-1">
             {tabs.map(({ id, Icon }) => (
-              <button key={id} onClick={() => setActive(id)} className={`grid h-10 place-items-center ${active === id ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+              <button key={id} onClick={() => setActive(id)} className={`grid h-10 cursor-pointer place-items-center ${active === id ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
                 <Icon className="size-4" />
               </button>
             ))}
@@ -108,15 +107,19 @@ function QuizPanel() {
   const [questions, setQuestions] = useState<QuizQuestion[]>([])
   const [index, setIndex] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
+  const [score, setScore] = useState(0)
+  const [finished, setFinished] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const current = questions[index]
+  const current = finished ? undefined : questions[index]
   const answered = selected !== null
 
   async function loadQuiz(nextTheme = theme) {
     setLoading(true)
     setError("")
     setSelected(null)
+    setScore(0)
+    setFinished(false)
     try {
       const data = await generateQuiz(nextTheme)
       setQuestions(data.questions)
@@ -130,15 +133,29 @@ function QuizPanel() {
 
   async function answer(optionIndex: number) {
     if (!current || answered) return
+    const isCorrect = optionIndex === current.correctIndex
     setSelected(optionIndex)
+    if (isCorrect) setScore((value) => value + 1)
+
     await saveAttempt({
       theme: current.theme,
       question: current.statement,
       selectedAnswer: current.options[optionIndex],
       correctAnswer: current.options[current.correctIndex],
-      isCorrect: optionIndex === current.correctIndex,
-      explanation: optionIndex === current.correctIndex ? current.explanation : current.wrongFeedback[optionIndex] || current.explanation,
+      isCorrect,
+      explanation: isCorrect ? current.explanation : current.wrongFeedback[optionIndex] || current.explanation,
     }).catch(() => undefined)
+  }
+
+  function goNext() {
+    if (!questions.length || !answered) return
+    if (index >= questions.length - 1) {
+      setFinished(true)
+      setSelected(null)
+      return
+    }
+    setSelected(null)
+    setIndex((value) => value + 1)
   }
 
   const feedback = useMemo(() => {
@@ -157,7 +174,7 @@ function QuizPanel() {
               setTheme(item)
               loadQuiz(item)
             }}
-            className={`border p-4 text-left text-sm font-semibold transition hover:border-primary ${
+            className={`cursor-pointer border p-4 text-left text-sm font-semibold transition hover:border-primary ${
               theme === item ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"
             }`}
           >
@@ -171,10 +188,25 @@ function QuizPanel() {
             <p className="text-sm text-muted-foreground">Tema atual</p>
             <h2 className="text-xl font-black">{theme}</h2>
           </div>
-          <Button onClick={() => loadQuiz()} disabled={loading}>{loading ? "Gerando..." : "Gerar quiz"}</Button>
+          <Button onClick={() => loadQuiz()} disabled={loading} className="cursor-pointer disabled:cursor-not-allowed">
+            {loading ? "Gerando..." : questions.length ? "Recomeçar quiz" : "Gerar quiz"}
+          </Button>
         </div>
         {error ? <p className="mt-4 text-sm text-destructive">{error}</p> : null}
-        {current ? (
+        {finished ? (
+          <div className="mt-8 grid min-h-80 place-items-center border border-amber-900/20 bg-amber-50 p-8 text-center">
+            <div>
+              <Trophy className="mx-auto size-14 text-amber-700" />
+              <h3 className="mt-4 text-3xl font-black text-amber-950">Parabéns!</h3>
+              <p className="mt-3 text-lg text-amber-950">
+                Você conseguiu {score} de {questions.length} questões.
+              </p>
+              <p className="mt-2 text-sm text-amber-900/80">
+                Seu desempenho foi salvo no histórico e já conta para o ranking.
+              </p>
+            </div>
+          </div>
+        ) : current ? (
           <div className="mt-6 grid gap-5 lg:grid-cols-[.85fr_1.15fr]">
             <div className="min-h-64 overflow-hidden bg-muted">
               {current.imageUrl ? (
@@ -194,7 +226,8 @@ function QuizPanel() {
                     <button
                       key={option}
                       onClick={() => answer(optionIndex)}
-                      className={`border p-4 text-left transition ${
+                      disabled={answered}
+                      className={`cursor-pointer border p-4 text-left transition disabled:cursor-default ${
                         isCorrect ? "border-emerald-700 bg-emerald-50 text-emerald-950" : isWrong ? "border-destructive bg-red-50 text-red-950" : "border-border bg-background hover:border-primary"
                       }`}
                     >
@@ -209,10 +242,9 @@ function QuizPanel() {
                 </div>
               ) : null}
               <div className="mt-5 flex justify-end">
-                <Button disabled={!answered} onClick={() => {
-                  setSelected(null)
-                  setIndex((value) => (value + 1) % questions.length)
-                }}>Próxima questão</Button>
+                <Button disabled={!answered} onClick={goNext} className="cursor-pointer disabled:cursor-not-allowed">
+                  {index >= questions.length - 1 ? "Finalizar quiz" : "Próxima questão"}
+                </Button>
               </div>
             </div>
           </div>
@@ -260,7 +292,7 @@ function ChatPanel() {
         </div>
         <div className="mt-4 grid gap-2 md:grid-cols-[1fr_auto]">
           <Textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Ex: Como funcionava o Senado Romano?" />
-          <Button onClick={send} disabled={loading}>{loading ? "Consultando..." : "Enviar"}</Button>
+          <Button onClick={send} disabled={loading} className="cursor-pointer disabled:cursor-not-allowed">{loading ? "Consultando..." : "Enviar"}</Button>
         </div>
       </div>
     </div>
@@ -277,7 +309,7 @@ function RankingPanel() {
   return (
     <div>
       <PanelTitle icon={<Medal className="size-5" />} title="Ranking" subtitle="Usuários com mais acertos por tema e no geral." />
-      <select value={theme} onChange={(event) => setTheme(event.target.value)} className="mt-6 h-10 border bg-card px-3">
+      <select value={theme} onChange={(event) => setTheme(event.target.value)} className="mt-6 h-10 cursor-pointer border bg-card px-3">
         {["Geral", ...themes].map((item) => <option key={item}>{item}</option>)}
       </select>
       <div className="mt-4 overflow-hidden border bg-card">
@@ -305,7 +337,7 @@ function HistoryPanel() {
   return (
     <div>
       <PanelTitle icon={<History className="size-5" />} title="Histórico de questões" subtitle="Revise acertos e erros salvos no PostgreSQL." />
-      <select value={theme} onChange={(event) => setTheme(event.target.value)} className="mt-6 h-10 border bg-card px-3">
+      <select value={theme} onChange={(event) => setTheme(event.target.value)} className="mt-6 h-10 cursor-pointer border bg-card px-3">
         {["Todos", ...themes].map((item) => <option key={item}>{item}</option>)}
       </select>
       <div className="mt-4 grid gap-3">
