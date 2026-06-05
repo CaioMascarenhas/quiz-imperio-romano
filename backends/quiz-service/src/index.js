@@ -13,10 +13,21 @@ const geminiModel = process.env.GEMINI_MODEL || "gemini-3.5-flash"
 let geminiClientPromise
 
 const imageCatalog = [
-  { name: "colosseum", url: "/roman-assets/colosseum.svg", description: "Coliseu, anfiteatro e arquitetura pública" },
-  { name: "legion", url: "/roman-assets/legion.svg", description: "Legião romana, escudo, exército e organização militar" },
-  { name: "senate", url: "/roman-assets/senate.svg", description: "Senado, política, república e debates públicos" },
-  { name: "aqueduct", url: "/roman-assets/aqueduct.svg", description: "Aquedutos, engenharia, água e infraestrutura" },
+  { name: "aquedutoromano", url: "/roman-assets/aquedutoromano.jpeg", description: "aquedutoromano" },
+  { name: "coliseu", url: "/roman-assets/coliseu.jpg", description: "coliseu" },
+  { name: "extensao_maxima_imperio", url: "/roman-assets/extensao_maxima_imperio.jpeg", description: "extensao_maxima_imperio" },
+  { name: "gladio", url: "/roman-assets/gladio.jpeg", description: "gladio" },
+  { name: "invasoesimperioromano", url: "/roman-assets/invasoesimperioromano.jpeg", description: "invasoesimperioromano" },
+  { name: "juliocesar", url: "/roman-assets/juliocesar.jpeg", description: "juliocesar" },
+  { name: "legiaomarchando", url: "/roman-assets/legiaomarchando.jpeg", description: "legiaomarchando" },
+  { name: "legiaoromana", url: "/roman-assets/legiaoromana.jpeg", description: "legiaoromana" },
+  { name: "nero", url: "/roman-assets/nero.jpeg", description: "nero" },
+  { name: "neroeincendioromano", url: "/roman-assets/neroeincendioromano.jpeg", description: "neroeincendioromano" },
+  { name: "paxromana", url: "/roman-assets/paxromana.jpeg", description: "paxromana" },
+  { name: "quedaromana", url: "/roman-assets/quedaromana.jpeg", description: "quedaromana" },
+  { name: "romanoocidenteeoriente", url: "/roman-assets/romanoocidenteeoriente.jpeg", description: "romanoocidenteeoriente" },
+  { name: "senado", url: "/roman-assets/senado.jpeg", description: "senado" },
+  { name: "spqr", url: "/roman-assets/spqr.jpeg", description: "spqr" },
 ]
 
 app.use(cors({ origin: process.env.CORS_ORIGIN || "*", credentials: true }))
@@ -32,31 +43,11 @@ function requireAuth(req, res, next) {
   }
 }
 
-function fallbackQuestions(theme) {
-  return [
-    {
-      id: `${theme}-1`,
-      theme,
-      statement: `Qual alternativa melhor representa o tema ${theme} no contexto romano?`,
-      imageUrl: imageCatalog[0].url,
-      options: ["Expansão política e cultural", "Uso de tecnologia moderna", "Monarquia medieval", "Colonização americana"],
-      correctIndex: 0,
-      explanation: "A história romana combina expansão, administração, cultura e integração de povos.",
-      wrongFeedback: [
-        "Correto: Roma expandiu poder, cultura e administração por grande parte do Mediterrâneo.",
-        "Tecnologia moderna não pertence ao período romano.",
-        "Monarquia medieval é posterior ao Império Romano do Ocidente.",
-        "Colonização americana é um processo muito posterior.",
-      ],
-    },
-  ]
-}
-
 function extractJson(text) {
   const cleaned = text.replace(/```json|```/g, "").trim()
   const first = cleaned.indexOf("{")
   const last = cleaned.lastIndexOf("}")
-  if (first === -1 || last === -1) throw new Error("A Gemini não retornou JSON válido.")
+  if (first === -1 || last === -1) throw new Error("A IA não retornou JSON válido.")
   return JSON.parse(cleaned.slice(first, last + 1))
 }
 
@@ -81,20 +72,21 @@ async function askGemini(prompt) {
   })
 
   const text = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text || ""
-  if (!text.trim()) throw new Error("A Gemini respondeu sem texto.")
+  if (!text.trim()) throw new Error("A IA respondeu sem texto.")
   return text
 }
 
-app.get("/health", (_req, res) => res.json({ ok: true, service: "quiz", model: geminiModel }))
+app.get("/health", (_req, res) => res.json({ ok: true, service: "quiz", model: geminiModel, images: imageCatalog.length }))
 
 app.post("/quiz/generate", requireAuth, async (req, res) => {
   const theme = req.body.theme || "Imperadores"
   const prompt = `
-Gere um quiz educativo, não violento, sobre o Império Romano no tema "${theme}".
+Gere um quiz educativo sobre o Império Romano no tema "${theme}".
 Responda apenas JSON válido no formato:
 {"questions":[{"id":"string","theme":"${theme}","statement":"string","imageUrl":"string ou null","options":["A","B","C","D"],"correctIndex":0,"explanation":"string","wrongFeedback":["feedback A","feedback B","feedback C","feedback D"]}]}
 Regras: gere 5 questões, 4 alternativas cada, correctIndex entre 0 e 3, feedbacks explicam por que cada alternativa errada está errada e indicam a correta quando necessário.
-Use imageUrl apenas se o assunto combinar com uma destas imagens locais do frontend:
+Use imageUrl apenas se o assunto combinar com uma destas imagens locais do frontend.
+As descrições das imagens são os próprios nomes dos arquivos; escolha a URL mais coerente com o tema da questão:
 ${JSON.stringify(imageCatalog)}
 `
   try {
@@ -102,8 +94,8 @@ ${JSON.stringify(imageCatalog)}
     const payload = extractJson(text)
     res.json(payload)
   } catch (error) {
-    console.error("Falha ao gerar quiz com Gemini:", error.message)
-    res.json({ questions: fallbackQuestions(theme), warning: error.message })
+    console.error("Falha ao gerar quiz com IA:", error.message)
+    res.status(503).json({ error: "Não foi possível gerar questões agora. Tente novamente em instantes." })
   }
 })
 
@@ -112,7 +104,7 @@ app.post("/chat", requireAuth, async (req, res) => {
   if (!message.trim()) return res.status(400).json({ error: "Informe uma pergunta." })
 
   const prompt = `
-Você é um tutor de história do Império Romano em um jogo acadêmico não violento.
+Você é um tutor de história do Império Romano.
 Responda em português do Brasil, com precisão histórica, tom educativo e até 140 palavras.
 Pergunta do usuário: ${message}
 `
@@ -120,7 +112,7 @@ Pergunta do usuário: ${message}
     const answer = await askGemini(prompt)
     res.json({ answer })
   } catch (error) {
-    console.error("Falha no chat com Gemini:", error.message)
+    console.error("Falha no chat com IA:", error.message)
     res.status(503).json({
       error:
         "Não consegui consultar a IA agora. Verifique a chave GEMINI_API_KEY, o GEMINI_MODEL e os logs do quiz-service.",

@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react"
 import type React from "react"
+import Lottie from "lottie-react"
 import { useRouter } from "next/navigation"
-import { Bot, Crown, History, Landmark, LogOut, Medal, MessageCircle, ScrollText, Trophy } from "lucide-react"
+import { Bot, History, Landmark, LogOut, Medal, MessageCircle, ScrollText, Trophy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -49,11 +50,11 @@ export default function DashboardPage() {
     <main className="min-h-screen bg-background">
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-72 border-r border-sidebar-border bg-sidebar p-5 text-sidebar-foreground md:block">
         <div className="flex items-center gap-3">
-          <div className="grid size-11 place-items-center bg-sidebar-primary text-sidebar-primary-foreground">
-            <Crown className="size-5" />
+          <div className="grid size-11 place-items-center overflow-hidden bg-sidebar-primary text-sidebar-primary-foreground">
+            <img src="/logo.jpeg" alt="" className="size-11 object-cover" />
           </div>
           <div>
-            <p className="text-xs uppercase text-amber-200/70">Roma Ludus</p>
+            <p className="text-xs uppercase text-amber-200/70">Roma Quiz</p>
             <h1 className="font-black">Salve, {userName}</h1>
           </div>
         </div>
@@ -79,7 +80,10 @@ export default function DashboardPage() {
       <section className="md:pl-72">
         <header className="sticky top-0 z-10 border-b bg-background/90 px-4 py-3 backdrop-blur md:hidden">
           <div className="flex items-center justify-between">
-            <strong>Roma Ludus</strong>
+            <span className="flex items-center gap-2">
+              <img src="/logo.jpeg" alt="" className="size-8 object-cover" />
+              <strong>Roma Quiz</strong>
+            </span>
             <Button onClick={logout} variant="ghost" size="icon" className="cursor-pointer"><LogOut className="size-4" /></Button>
           </div>
           <div className="mt-3 grid grid-cols-4 gap-1">
@@ -111,21 +115,30 @@ function QuizPanel() {
   const [finished, setFinished] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [animationData, setAnimationData] = useState<object | null>(null)
   const current = finished ? undefined : questions[index]
   const answered = selected !== null
+
+  useEffect(() => {
+    fetch("/animations/coliseum.json")
+      .then((response) => response.json())
+      .then(setAnimationData)
+      .catch(() => setAnimationData(null))
+  }, [])
 
   async function loadQuiz(nextTheme = theme) {
     setLoading(true)
     setError("")
+    setQuestions([])
+    setIndex(0)
     setSelected(null)
     setScore(0)
     setFinished(false)
     try {
       const data = await generateQuiz(nextTheme)
       setQuestions(data.questions)
-      setIndex(0)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao gerar quiz.")
+      setError(err instanceof Error ? err.message : "Não foi possível gerar questões agora.")
     } finally {
       setLoading(false)
     }
@@ -165,16 +178,17 @@ function QuizPanel() {
 
   return (
     <div>
-      <PanelTitle icon={<Landmark className="size-5" />} title="Quiz por tema" subtitle="Escolha um tema e gere questões com Gemini." />
+      <PanelTitle icon={<Landmark className="size-5" />} title="Quiz por tema" subtitle="Escolha um tema e gere questões com IA." />
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {themes.map((item) => (
           <button
             key={item}
+            disabled={loading}
             onClick={() => {
               setTheme(item)
               loadQuiz(item)
             }}
-            className={`cursor-pointer border p-4 text-left text-sm font-semibold transition hover:border-primary ${
+            className={`cursor-pointer border p-4 text-left text-sm font-semibold transition hover:border-primary disabled:cursor-not-allowed disabled:opacity-70 ${
               theme === item ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"
             }`}
           >
@@ -193,7 +207,15 @@ function QuizPanel() {
           </Button>
         </div>
         {error ? <p className="mt-4 text-sm text-destructive">{error}</p> : null}
-        {finished ? (
+        {loading ? (
+          <div className="mt-8 grid min-h-96 place-items-center border border-amber-900/20 bg-amber-50 p-8 text-center">
+            <div className="w-full max-w-sm">
+              {animationData ? <Lottie animationData={animationData} loop className="mx-auto h-56 w-56" /> : <Trophy className="mx-auto size-16 animate-pulse text-amber-700" />}
+              <h3 className="mt-4 text-3xl font-black text-amber-950">Gerando...</h3>
+              <p className="mt-2 text-sm text-amber-900/80">Preparando questões para o tema {theme}.</p>
+            </div>
+          </div>
+        ) : finished ? (
           <div className="mt-8 grid min-h-80 place-items-center border border-amber-900/20 bg-amber-50 p-8 text-center">
             <div>
               <Trophy className="mx-auto size-14 text-amber-700" />
@@ -207,15 +229,15 @@ function QuizPanel() {
             </div>
           </div>
         ) : current ? (
-          <div className="mt-6 grid gap-5 lg:grid-cols-[.85fr_1.15fr]">
-            <div className="min-h-64 overflow-hidden bg-muted">
+          <div className="mt-6 grid items-start gap-5 lg:grid-cols-[minmax(280px,.85fr)_minmax(0,1.15fr)]">
+            <div className="grid aspect-[4/3] h-auto max-h-[420px] min-h-[260px] w-full place-items-center overflow-hidden border bg-stone-950/5 p-3">
               {current.imageUrl ? (
-                <img src={current.imageUrl} alt="" className="h-full w-full object-cover" />
+                <img src={current.imageUrl} alt="" className="h-full max-h-[396px] w-full object-contain" />
               ) : (
                 <div className="grid h-full place-items-center p-8 text-center text-muted-foreground">Questão sem imagem</div>
               )}
             </div>
-            <div>
+            <div className="min-h-[420px]">
               <p className="text-sm font-semibold text-primary">Questão {index + 1} de {questions.length}</p>
               <h3 className="mt-2 text-2xl font-black leading-tight">{current.statement}</h3>
               <div className="mt-5 grid gap-3">
@@ -281,7 +303,7 @@ function ChatPanel() {
 
   return (
     <div>
-      <PanelTitle icon={<Bot className="size-5" />} title="Chat sobre o Império Romano" subtitle="Conversa temporária, sem persistência de mensagens." />
+      <PanelTitle icon={<Bot className="size-5" />} title="Chat sobre o Império Romano" subtitle="Pergunte sobre personagens, eventos, cultura e sociedade romana." />
       <div className="mt-6 grid min-h-[560px] grid-rows-[1fr_auto] border bg-card p-4">
         <div className="space-y-3 overflow-y-auto pr-1">
           {items.length ? items.map((item, index) => (
@@ -336,7 +358,7 @@ function HistoryPanel() {
 
   return (
     <div>
-      <PanelTitle icon={<History className="size-5" />} title="Histórico de questões" subtitle="Revise acertos e erros salvos no PostgreSQL." />
+      <PanelTitle icon={<History className="size-5" />} title="Histórico de questões" subtitle="Revise seus acertos e erros por tema." />
       <select value={theme} onChange={(event) => setTheme(event.target.value)} className="mt-6 h-10 cursor-pointer border bg-card px-3">
         {["Todos", ...themes].map((item) => <option key={item}>{item}</option>)}
       </select>

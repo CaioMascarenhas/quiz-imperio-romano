@@ -38,7 +38,7 @@ export default function LoginPage() {
             <Landmark className="size-5" />
           </div>
           <div>
-            <h1 className="text-2xl font-black">Entrar em Roma Ludus</h1>
+            <h1 className="text-2xl font-black">Entrar em Roma Quiz</h1>
             <p className="text-sm text-muted-foreground">Acesse seu painel de estudos.</p>
           </div>
         </div>

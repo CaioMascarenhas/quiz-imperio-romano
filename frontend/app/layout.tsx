@@ -4,12 +4,12 @@ import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Roma Ludus | Quiz do Império Romano",
+  title: "Roma Quiz | Quiz do Império Romano",
   description:
-    "Jogo digital online não violento baseado em microservices para aprender sobre o Império Romano.",
+    "Quiz online para aprender sobre o Império Romano com questões por tema, ranking e histórico.",
   icons: {
-    icon: "/icon.svg",
-    apple: "/apple-icon.png",
+    icon: "/logo.jpeg",
+    apple: "/logo.jpeg",
   },
 }
 
