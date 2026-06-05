@@ -361,22 +361,54 @@ function RankingPanel() {
     getRanking(theme).then(setRows).catch(() => setRows([]))
   }, [theme])
 
+  function rankTitle(index: number) {
+    if (index === 0) return "Imperador"
+    if (index === 1) return "Senador"
+    if (index === 2) return "General"
+    return "Centurião"
+  }
+
+  function rankStyle(index: number) {
+    if (index === 0) return "border-amber-500 bg-amber-50 text-amber-950"
+    if (index === 1) return "border-red-900/30 bg-red-50 text-red-950"
+    if (index === 2) return "border-stone-500 bg-stone-100 text-stone-950"
+    return "border-border bg-card text-card-foreground"
+  }
+
   return (
     <div>
       <PanelTitle icon={<Medal className="size-5" />} title="Ranking" subtitle="Usuários com mais acertos por tema e no geral." />
-      <select value={theme} onChange={(event) => setTheme(event.target.value)} className="mt-6 h-10 cursor-pointer border bg-card px-3">
-        {["Geral", ...themes].map((item) => <option key={item}>{item}</option>)}
-      </select>
-      <div className="mt-4 overflow-hidden border bg-card">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+        <select value={theme} onChange={(event) => setTheme(event.target.value)} className="h-10 cursor-pointer border bg-card px-3">
+          {["Geral", ...themes].map((item) => <option key={item}>{item}</option>)}
+        </select>
+        <div className="text-sm font-semibold text-muted-foreground">Ordenado por acertos</div>
+      </div>
+      <div className="mt-4 grid gap-3">
         {rows.map((row, index) => (
-          <div key={`${row.userName}-${row.theme}-${index}`} className="grid grid-cols-[56px_1fr_120px_120px] items-center gap-3 border-b p-4 text-sm last:border-b-0">
-            <strong>#{index + 1}</strong>
-            <span>{row.userName}</span>
-            <span>{row.theme}</span>
-            <span className="font-semibold">{row.correct}/{row.total}</span>
+          <div
+            key={`${row.userName}-${row.theme}-${index}`}
+            className={`grid gap-4 border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md md:grid-cols-[72px_1fr_auto] md:items-center ${rankStyle(index)}`}
+          >
+            <div className="grid size-14 place-items-center border border-current/20 bg-white/45 text-lg font-black">
+              #{index + 1}
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-lg font-black">{row.userName}</h3>
+                <span className="border border-current/20 bg-white/40 px-2 py-1 text-xs font-bold uppercase tracking-wide">
+                  {rankTitle(index)}
+                </span>
+              </div>
+              <p className="mt-1 text-sm opacity-75">{row.theme}</p>
+            </div>
+            <div className="text-left md:text-right">
+              <p className="text-3xl font-black">{row.correct}</p>
+              <p className="text-xs font-bold uppercase tracking-wide opacity-70">acertos</p>
+            </div>
           </div>
         ))}
-        {!rows.length ? <div className="p-8 text-center text-muted-foreground">Nenhum resultado salvo ainda.</div> : null}
+        {!rows.length ? <div className="border border-dashed p-8 text-center text-muted-foreground">Nenhum resultado salvo ainda.</div> : null}
       </div>
     </div>
   )
