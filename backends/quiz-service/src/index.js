@@ -101,11 +101,22 @@ ${JSON.stringify(imageCatalog)}
 
 app.post("/chat", requireAuth, async (req, res) => {
   const message = req.body.message || ""
+  const history = Array.isArray(req.body.history) ? req.body.history.slice(-5) : []
   if (!message.trim()) return res.status(400).json({ error: "Informe uma pergunta." })
+
+  const conversationContext = history
+    .filter((item) => item && typeof item.text === "string")
+    .map((item) => `${item.role === "assistant" ? "Tutor" : "Usuário"}: ${item.text}`)
+    .join("\n")
 
   const prompt = `
 Você é um tutor de história do Império Romano.
 Responda em português do Brasil, com precisão histórica, tom educativo e até 140 palavras.
+Continue a conversa quando o contexto indicar uma pergunta de acompanhamento.
+Evite Markdown complexo; se precisar destacar algo, use frases simples.
+Contexto recente, limitado a 5 mensagens:
+${conversationContext || "Sem contexto anterior."}
+
 Pergunta do usuário: ${message}
 `
   try {

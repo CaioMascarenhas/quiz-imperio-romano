@@ -81,10 +81,13 @@ export function generateQuiz(theme: string) {
   })
 }
 
-export function askRomanChat(message: string) {
+export function askRomanChat(
+  message: string,
+  history: Array<{ role: "user" | "assistant"; text: string }> = [],
+) {
   return request<{ answer: string }>(`${QUIZ_URL}/chat`, {
     method: "POST",
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, history }),
   })
 }
 

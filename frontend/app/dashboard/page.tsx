@@ -284,18 +284,27 @@ function ChatPanel() {
   const [message, setMessage] = useState("")
   const [items, setItems] = useState<Array<{ role: "user" | "assistant"; text: string }>>([])
   const [loading, setLoading] = useState(false)
+  const [animationData, setAnimationData] = useState<object | null>(null)
+
+  useEffect(() => {
+    fetch("/animations/coliseum.json")
+      .then((response) => response.json())
+      .then(setAnimationData)
+      .catch(() => setAnimationData(null))
+  }, [])
 
   async function send() {
     if (!message.trim()) return
     const text = message.trim()
-    setItems((current) => [...current, { role: "user", text }])
+    const history = items.slice(-5)
+    setItems((current) => [...current, { role: "user", text }].slice(-5))
     setMessage("")
     setLoading(true)
     try {
-      const data = await askRomanChat(text)
-      setItems((current) => [...current, { role: "assistant", text: data.answer }])
+      const data = await askRomanChat(text, history)
+      setItems((current) => [...current, { role: "assistant", text: data.answer }].slice(-5))
     } catch (err) {
-      setItems((current) => [...current, { role: "assistant", text: err instanceof Error ? err.message : "Erro no chat." }])
+      setItems((current) => [...current, { role: "assistant", text: err instanceof Error ? err.message : "Erro no chat." }].slice(-5))
     } finally {
       setLoading(false)
     }
@@ -307,10 +316,16 @@ function ChatPanel() {
       <div className="mt-6 grid min-h-[560px] grid-rows-[1fr_auto] border bg-card p-4">
         <div className="space-y-3 overflow-y-auto pr-1">
           {items.length ? items.map((item, index) => (
-            <div key={index} className={`max-w-[82%] p-4 text-sm leading-6 ${item.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "bg-muted"}`}>
-              {item.text}
+            <div key={index} className={`max-w-[82%] whitespace-pre-wrap p-4 text-sm leading-6 ${item.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "bg-muted"}`}>
+              <FormattedMessage text={item.text} />
             </div>
           )) : <div className="grid h-full place-items-center text-muted-foreground">Pergunte sobre batalhas, arquitetura, política, sociedade ou imperadores.</div>}
+          {loading ? (
+            <div className="max-w-[82%] bg-muted p-4 text-sm leading-6">
+              {animationData ? <Lottie animationData={animationData} loop className="h-24 w-24" /> : <Trophy className="size-10 animate-pulse text-amber-700" />}
+              <p className="font-semibold text-primary">Consultando a IA...</p>
+            </div>
+          ) : null}
         </div>
         <div className="mt-4 grid gap-2 md:grid-cols-[1fr_auto]">
           <Textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Ex: Como funcionava o Senado Romano?" />
@@ -318,6 +333,24 @@ function ChatPanel() {
         </div>
       </div>
     </div>
+  )
+}
+
+function FormattedMessage({ text }: { text: string }) {
+  return (
+    <>
+      {text.split("\n").map((line, lineIndex) => (
+        <span key={`${line}-${lineIndex}`}>
+          {line.split(/(\*\*[^*]+\*\*)/g).map((part, partIndex) => {
+            if (part.startsWith("**") && part.endsWith("**")) {
+              return <strong key={partIndex}>{part.slice(2, -2)}</strong>
+            }
+            return <span key={partIndex}>{part}</span>
+          })}
+          {lineIndex < text.split("\n").length - 1 ? <br /> : null}
+        </span>
+      ))}
+    </>
   )
 }
 
