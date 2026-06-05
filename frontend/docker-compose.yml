@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: roma_ludus
+      POSTGRES_USER: roma
+      POSTGRES_PASSWORD: roma
+    ports:
+      - "5432:5432"
+    volumes:
+      - roma_postgres_data:/var/lib/postgresql/data
+
+  auth-service:
+    build: ../backends/auth-service
+    environment:
+      PORT: 4001
+      DATABASE_URL: postgres://roma:roma@postgres:5432/roma_ludus
+      JWT_SECRET: ${AUTH_SECRET:-roma-ludus-secret}
+      CORS_ORIGIN: "*"
+    ports:
+      - "4001:4001"
+    depends_on:
+      - postgres
+
+  quiz-service:
+    build: ../backends/quiz-service
+    env_file:
+      - ./.env
+    environment:
+      PORT: 4002
+      JWT_SECRET: ${AUTH_SECRET:-roma-ludus-secret}
+      CORS_ORIGIN: "*"
+    ports:
+      - "4002:4002"
+
+  progress-service:
+    build: ../backends/progress-service
+    environment:
+      PORT: 4003
+      DATABASE_URL: postgres://roma:roma@postgres:5432/roma_ludus
+      JWT_SECRET: ${AUTH_SECRET:-roma-ludus-secret}
+      CORS_ORIGIN: "*"
+    ports:
+      - "4003:4003"
+    depends_on:
+      - postgres
+
+  frontend:
+    build: .
+    env_file:
+      - ./.env
+    environment:
+      NEXT_PUBLIC_AUTH_API_URL: http://localhost:4001
+      NEXT_PUBLIC_QUIZ_API_URL: http://localhost:4002
+      NEXT_PUBLIC_PROGRESS_API_URL: http://localhost:4003
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+      - quiz-service
+      - progress-service
+
+volumes:
+  roma_postgres_data:

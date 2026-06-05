@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520">
+  <rect width="900" height="520" fill="#2b1711"/>
+  <circle cx="450" cy="210" r="120" fill="#c99a43"/>
+  <path d="M330 210c35-75 205-75 240 0v145c-55 70-185 70-240 0z" fill="#8b2f25"/>
+  <path d="M450 70v390" stroke="#f2d27b" stroke-width="24"/>
+  <path d="M350 200h200M365 285h170" stroke="#f2d27b" stroke-width="18"/>
+  <path d="M240 92h420l-80 58H320z" fill="#f2d27b"/>
+  <text x="450" y="470" text-anchor="middle" font-family="Arial" font-size="34" font-weight="700" fill="#fff4d7">Legio Romana</text>
+</svg>

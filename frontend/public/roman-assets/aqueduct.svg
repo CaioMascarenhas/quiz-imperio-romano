@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520">
+  <rect width="900" height="520" fill="#d9ecf0"/>
+  <rect y="390" width="900" height="130" fill="#486b55"/>
+  <path d="M80 350h740v55H80z" fill="#c99a43"/>
+  <path d="M95 350c20-105 110-105 130 0h-45c-13-55-50-55-63 0zM255 350c20-105 110-105 130 0h-45c-13-55-50-55-63 0zM415 350c20-105 110-105 130 0h-45c-13-55-50-55-63 0zM575 350c20-105 110-105 130 0h-45c-13-55-50-55-63 0z" fill="#8b2f25"/>
+  <rect x="95" y="210" width="710" height="55" fill="#b8893d"/>
+  <rect x="110" y="265" width="55" height="140" fill="#c99a43"/>
+  <rect x="270" y="265" width="55" height="140" fill="#c99a43"/>
+  <rect x="430" y="265" width="55" height="140" fill="#c99a43"/>
+  <rect x="590" y="265" width="55" height="140" fill="#c99a43"/>
+  <text x="450" y="115" text-anchor="middle" font-family="Arial" font-size="36" font-weight="700" fill="#5f211b">Aquaeductus</text>
+</svg>
