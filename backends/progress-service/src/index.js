@@ -1,6 +1,7 @@
 require("dotenv").config()
 
 const cors = require("cors")
+const crypto = require("crypto")
 const express = require("express")
 const jwt = require("jsonwebtoken")
 const { Pool } = require("pg")
@@ -17,16 +18,15 @@ app.use(express.json())
 
 async function init() {
   await pool.query(`
-    create extension if not exists "uuid-ossp";
     create table if not exists users (
-      id uuid primary key default uuid_generate_v4(),
+      id uuid primary key,
       name text not null,
       email text not null unique,
       password_hash text not null,
       created_at timestamptz not null default now()
     );
     create table if not exists quiz_attempts (
-      id uuid primary key default uuid_generate_v4(),
+      id uuid primary key,
       user_id uuid not null references users(id) on delete cascade,
       theme text not null,
       question text not null,
@@ -58,10 +58,10 @@ app.post("/attempts", requireAuth, async (req, res) => {
   }
   const result = await pool.query(
     `insert into quiz_attempts
-      (user_id, theme, question, selected_answer, correct_answer, is_correct, explanation)
-     values ($1, $2, $3, $4, $5, $6, $7)
+      (id, user_id, theme, question, selected_answer, correct_answer, is_correct, explanation)
+     values ($1, $2, $3, $4, $5, $6, $7, $8)
      returning id`,
-    [req.user.sub, theme, question, selectedAnswer, correctAnswer, Boolean(isCorrect), explanation || ""],
+    [crypto.randomUUID(), req.user.sub, theme, question, selectedAnswer, correctAnswer, Boolean(isCorrect), explanation || ""],
   )
   res.status(201).json({ id: result.rows[0].id })
 })

@@ -2,6 +2,7 @@ require("dotenv").config()
 
 const bcrypt = require("bcryptjs")
 const cors = require("cors")
+const crypto = require("crypto")
 const express = require("express")
 const jwt = require("jsonwebtoken")
 const { Pool } = require("pg")
@@ -18,9 +19,8 @@ app.use(express.json())
 
 async function init() {
   await pool.query(`
-    create extension if not exists "uuid-ossp";
     create table if not exists users (
-      id uuid primary key default uuid_generate_v4(),
+      id uuid primary key,
       name text not null,
       email text not null unique,
       password_hash text not null,
@@ -48,8 +48,8 @@ app.post("/register", async (req, res) => {
   try {
     const passwordHash = await bcrypt.hash(password, 10)
     const result = await pool.query(
-      "insert into users (name, email, password_hash) values ($1, lower($2), $3) returning id, name, email",
-      [name, email, passwordHash],
+      "insert into users (id, name, email, password_hash) values ($1, $2, lower($3), $4) returning id, name, email",
+      [crypto.randomUUID(), name, email, passwordHash],
     )
     const user = result.rows[0]
     res.status(201).json({ token: signUser(user), user: publicUser(user) })
