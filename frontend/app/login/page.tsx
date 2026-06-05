@@ -46,10 +46,10 @@ export default function LoginPage() {
           <Input type="email" placeholder="Email" value={email} onChange={(event) => setEmail(event.target.value)} required />
           <Input type="password" placeholder="Senha" value={password} onChange={(event) => setPassword(event.target.value)} required />
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
-          <Button disabled={loading} className="h-11">{loading ? "Entrando..." : "Va para o dashboard"}</Button>
+          <Button disabled={loading} className="h-11">{loading ? "Entrando..." : "Vá para o dashboard"}</Button>
         </div>
         <p className="mt-6 text-sm text-muted-foreground">
-          Ainda nao tem conta? <Link className="font-semibold text-primary underline" href="/register">Criar conta</Link>
+          Ainda não tem conta? <Link className="font-semibold text-primary underline" href="/register">Criar conta</Link>
         </p>
       </form>
     </main>

@@ -23,14 +23,14 @@ export default async function Home() {
           <div className="flex max-w-3xl flex-col justify-center">
             <div className="mb-6 flex w-fit items-center gap-2 border border-amber-300/40 bg-black/30 px-3 py-2 text-sm text-amber-100 backdrop-blur">
               <Crown className="size-4 text-amber-300" />
-              Jogo digital online nao violento
+              Jogo digital online não violento
             </div>
             <h1 className="max-w-3xl text-5xl font-black leading-[1.02] text-stone-50 sm:text-6xl lg:text-7xl">
               Roma Ludus
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-200">
-              Um quiz sobre o Imperio Romano com questoes geradas por IA,
-              feedback educativo, ranking por tema e historico de desempenho.
+              Um quiz sobre o Império Romano com questões geradas por IA,
+              feedback educativo, ranking por tema e histórico de desempenho.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               {hasSession ? (
@@ -42,10 +42,10 @@ export default async function Home() {
               ) : (
                 <>
                   <Button asChild size="lg" className="bg-amber-400 text-stone-950 hover:bg-amber-300">
-                    <Link href="/login">Va para o login</Link>
+                    <Link href="/login">Vá para o login</Link>
                   </Button>
                   <Button asChild size="lg" variant="outline" className="border-stone-200/60 bg-black/20 text-stone-50 hover:bg-stone-50 hover:text-stone-950">
-                    <Link href="/register">Va para criar conta</Link>
+                    <Link href="/register">Vá para criar conta</Link>
                   </Button>
                 </>
               )}
@@ -55,8 +55,8 @@ export default async function Home() {
           <div className="grid content-end gap-4 pt-20 md:pt-48">
             {[
               { title: "Microservices", text: "Auth, quiz/chat IA e progresso em APIs Express separadas.", Icon: Shield },
-              { title: "Aprendizado", text: "Questoes de alternativas com explicacao do erro e resposta correta.", Icon: ScrollText },
-              { title: "Temas", text: "Politica, exercito, cultura, arquitetura, economia e imperadores.", Icon: Landmark },
+              { title: "Aprendizado", text: "Questões de alternativas com explicação do erro e resposta correta.", Icon: ScrollText },
+              { title: "Temas", text: "Política, exército, cultura, arquitetura, economia e imperadores.", Icon: Landmark },
             ].map(({ title, text, Icon }) => (
               <div key={title} className="border border-amber-200/20 bg-stone-950/45 p-5 backdrop-blur-md">
                 <div className="flex items-start gap-4">

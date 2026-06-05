@@ -45,7 +45,7 @@ function requireAuth(req, res, next) {
     req.user = jwt.verify(token, jwtSecret)
     next()
   } catch {
-    res.status(401).json({ error: "Sessao invalida." })
+    res.status(401).json({ error: "Sessão inválida." })
   }
 }
 

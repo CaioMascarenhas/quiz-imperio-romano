@@ -55,7 +55,7 @@ app.post("/register", async (req, res) => {
     res.status(201).json({ token: signUser(user), user: publicUser(user) })
   } catch (error) {
     if (error.code === "23505") return res.status(409).json({ error: "Email ja cadastrado." })
-    res.status(500).json({ error: "Erro ao criar usuario." })
+    res.status(500).json({ error: "Erro ao criar usuário." })
   }
 })
 
@@ -79,7 +79,7 @@ app.get("/me", (req, res) => {
     const payload = jwt.verify(token, jwtSecret)
     res.json({ user: { id: payload.sub, name: payload.name, email: payload.email } })
   } catch {
-    res.status(401).json({ error: "Sessao invalida." })
+    res.status(401).json({ error: "Sessão inválida." })
   }
 })
 

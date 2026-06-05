@@ -40,7 +40,7 @@ export default function RegisterPage() {
           </div>
           <div>
             <h1 className="text-2xl font-black">Criar conta</h1>
-            <p className="text-sm text-muted-foreground">Salve seu ranking e historico.</p>
+            <p className="text-sm text-muted-foreground">Salve seu ranking e histórico.</p>
           </div>
         </div>
         <div className="grid gap-4">
@@ -51,7 +51,7 @@ export default function RegisterPage() {
           <Button disabled={loading} className="h-11">{loading ? "Criando..." : "Criar conta"}</Button>
         </div>
         <p className="mt-6 text-sm text-muted-foreground">
-          Ja possui conta? <Link className="font-semibold text-primary underline" href="/login">Entrar</Link>
+          Já possui conta? <Link className="font-semibold text-primary underline" href="/login">Entrar</Link>
         </p>
       </form>
     </main>

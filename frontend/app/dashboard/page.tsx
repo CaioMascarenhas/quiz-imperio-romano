@@ -18,12 +18,12 @@ import {
   saveAttempt,
 } from "@/lib/api"
 
-const themes = ["Imperadores", "Exercito Romano", "Arquitetura", "Mitologia e Religiao", "Politica", "Economia", "Cultura e Sociedade"]
+const themes = ["Imperadores", "Exército Romano", "Arquitetura", "Mitologia e Religião", "Política", "Economia", "Cultura e Sociedade"]
 const tabs = [
   { id: "quiz", label: "Quiz por tema", Icon: ScrollText },
   { id: "chat", label: "Chat romano", Icon: MessageCircle },
   { id: "ranking", label: "Ranking", Icon: Trophy },
-  { id: "history", label: "Historico", Icon: History },
+  { id: "history", label: "Histórico", Icon: History },
 ] as const
 
 type Tab = (typeof tabs)[number]["id"]
@@ -33,7 +33,7 @@ type RankingRow = Awaited<ReturnType<typeof getRanking>>[number]
 export default function DashboardPage() {
   const router = useRouter()
   const [active, setActive] = useState<Tab>("quiz")
-  const [userName, setUserName] = useState("Cidadao")
+  const [userName, setUserName] = useState("Cidadão")
 
   useEffect(() => {
     const user = getStoredUser()
@@ -148,7 +148,7 @@ function QuizPanel() {
 
   return (
     <div>
-      <PanelTitle icon={<Landmark className="size-5" />} title="Quiz por tema" subtitle="Escolha um tema e gere questoes com Gemini." />
+      <PanelTitle icon={<Landmark className="size-5" />} title="Quiz por tema" subtitle="Escolha um tema e gere questões com Gemini." />
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {themes.map((item) => (
           <button
@@ -180,11 +180,11 @@ function QuizPanel() {
               {current.imageUrl ? (
                 <img src={current.imageUrl} alt="" className="h-full w-full object-cover" />
               ) : (
-                <div className="grid h-full place-items-center p-8 text-center text-muted-foreground">Questao sem imagem</div>
+                <div className="grid h-full place-items-center p-8 text-center text-muted-foreground">Questão sem imagem</div>
               )}
             </div>
             <div>
-              <p className="text-sm font-semibold text-primary">Questao {index + 1} de {questions.length}</p>
+              <p className="text-sm font-semibold text-primary">Questão {index + 1} de {questions.length}</p>
               <h3 className="mt-2 text-2xl font-black leading-tight">{current.statement}</h3>
               <div className="mt-5 grid gap-3">
                 {current.options.map((option, optionIndex) => {
@@ -212,7 +212,7 @@ function QuizPanel() {
                 <Button disabled={!answered} onClick={() => {
                   setSelected(null)
                   setIndex((value) => (value + 1) % questions.length)
-                }}>Proxima questao</Button>
+                }}>Próxima questão</Button>
               </div>
             </div>
           </div>
@@ -249,14 +249,14 @@ function ChatPanel() {
 
   return (
     <div>
-      <PanelTitle icon={<Bot className="size-5" />} title="Chat sobre o Imperio Romano" subtitle="Conversa temporaria, sem persistencia de mensagens." />
+      <PanelTitle icon={<Bot className="size-5" />} title="Chat sobre o Império Romano" subtitle="Conversa temporária, sem persistência de mensagens." />
       <div className="mt-6 grid min-h-[560px] grid-rows-[1fr_auto] border bg-card p-4">
         <div className="space-y-3 overflow-y-auto pr-1">
           {items.length ? items.map((item, index) => (
             <div key={index} className={`max-w-[82%] p-4 text-sm leading-6 ${item.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "bg-muted"}`}>
               {item.text}
             </div>
-          )) : <div className="grid h-full place-items-center text-muted-foreground">Pergunte sobre batalhas, arquitetura, politica, sociedade ou imperadores.</div>}
+          )) : <div className="grid h-full place-items-center text-muted-foreground">Pergunte sobre batalhas, arquitetura, política, sociedade ou imperadores.</div>}
         </div>
         <div className="mt-4 grid gap-2 md:grid-cols-[1fr_auto]">
           <Textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Ex: Como funcionava o Senado Romano?" />
@@ -276,7 +276,7 @@ function RankingPanel() {
 
   return (
     <div>
-      <PanelTitle icon={<Medal className="size-5" />} title="Ranking" subtitle="Usuarios com mais acertos por tema e no geral." />
+      <PanelTitle icon={<Medal className="size-5" />} title="Ranking" subtitle="Usuários com mais acertos por tema e no geral." />
       <select value={theme} onChange={(event) => setTheme(event.target.value)} className="mt-6 h-10 border bg-card px-3">
         {["Geral", ...themes].map((item) => <option key={item}>{item}</option>)}
       </select>
@@ -304,7 +304,7 @@ function HistoryPanel() {
 
   return (
     <div>
-      <PanelTitle icon={<History className="size-5" />} title="Historico de questoes" subtitle="Revise acertos e erros salvos no PostgreSQL." />
+      <PanelTitle icon={<History className="size-5" />} title="Histórico de questões" subtitle="Revise acertos e erros salvos no PostgreSQL." />
       <select value={theme} onChange={(event) => setTheme(event.target.value)} className="mt-6 h-10 border bg-card px-3">
         {["Todos", ...themes].map((item) => <option key={item}>{item}</option>)}
       </select>
@@ -321,7 +321,7 @@ function HistoryPanel() {
             <p className="mt-2 text-sm leading-6">{row.explanation}</p>
           </div>
         ))}
-        {!rows.length ? <div className="border border-dashed p-8 text-center text-muted-foreground">Sem historico para este filtro.</div> : null}
+        {!rows.length ? <div className="border border-dashed p-8 text-center text-muted-foreground">Sem histórico para este filtro.</div> : null}
       </div>
     </div>
   )
