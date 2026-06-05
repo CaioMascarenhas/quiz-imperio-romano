@@ -87,7 +87,7 @@ GEMINI_MODEL=gemini-3.5-flash
 Na raiz do projeto:
 
 ```bash
-cd "C:\Users\caio-estg\Desktop\Projetos\ufal\quizimperioromano"
+cd pasta do seu projeto
 docker compose up --build
 ```
 
@@ -192,4 +192,3 @@ quizimperioromano/
 - O banco é único para simplificar o projeto acadêmico, embora a aplicação esteja organizada em microserviços.
 - O chat não persiste conversas no banco.
 - O histórico e o ranking persistem as tentativas do quiz no PostgreSQL.
-- Se a IA falhar, o backend não retorna questões mockadas; o usuário verá mensagem de erro e poderá tentar novamente.
